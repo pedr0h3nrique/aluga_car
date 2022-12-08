@@ -1,33 +1,32 @@
 const clientModel = require('../models/clientModel');
 const knex = require('../models/connection');
+const { format } = require('date-fns');
 
 const registerClient = async (req, res) => {
     const {
         name,
         cpf,
         car,
-        date_of_birth,
-        created_at        
+        date_of_birth,        
     } = req.body
 
     try {
-        // validação
+        await clientModel.validate(req.body);
 
         const clientsList = await knex('clients').where({ cpf });
 
         for (client of clientsList) {
             if (client.cpf === cpf) {
-                return res.status(400).json('O  informado já está cadastrado.');
+                return res.status(400).json('O cpf informado já está cadastrado.');
             }
         };
 
-        // To do: configurar o created at
-        const clientRegistered = await knex('clients').insert({
+        const [clientRegistered] = await knex('clients').insert({
             name: name.trim(),
             cpf,
             car,
             date_of_birth,
-            created_at 
+            created_at: format(new Date(), 'dd-MM-yyyy HH:mm:ss') 
         });
 
         if (!clientRegistered) {
@@ -51,7 +50,7 @@ const updateClient = async (req, res) => {
     } = req.body;
     
     try {
-        await clientModel.validate(req.body);
+        dataToUpdate = await clientModel.validate(req.body);
         
         const [clientFound] = await knex('clients').where({ id });
 
@@ -65,17 +64,14 @@ const updateClient = async (req, res) => {
 
         const [clientUpdated] = await knex('clients')
         .where({ id: clientFound.id })
-        .update(
-            name,
-            cpf,
-            car,
-            date_of_birth
-        )
+        .update(dataToUpdate)
         .returning('*');
 
     if (!clientUpdated) {
         return res.status(400).json('Não foi possível realizar atualização');
     };
+
+    return res.status(200).json('Cliente atualizado com sucesso.');
 
     } catch (error) {
         return res.status(500).json(error.message);
@@ -95,10 +91,9 @@ const listClients = async (_, res) => {
 
 const getClient = async (req, res) => {
     const { id } = req.params;
-    const { cpf } = req.body;
 
     try {
-        const [client] = await knex('clients').where({ id }).orWhere({ cpf });
+        const [client] = await knex('clients').where({ id });
         
         if (!client) {
             return res.status(400).json('Cliente não encontrado');
@@ -112,15 +107,14 @@ const getClient = async (req, res) => {
 
 const deleteClient = async (req, res) => {
     const { id } = req.params;
-    const { cpf } = req.body;
-    
-    const [client] = await knex('clients').where({ id }).orWhere({ cpf });
+   
+    const [client] = await knex('clients').where({ id });
 
     if (!client) {
         return res.status(400).json('Não foi possível encontrar cliente.');
     };
 
-    const clientDeleted = await knex('clients').where({ id }).orWhere({ cpf }).del();
+    const clientDeleted = await knex('clients').where({ id }).del();
 
     if (!clientDeleted) {
       return res.status(400).json('Não foi possível excluir cliente.');

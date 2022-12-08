@@ -1,21 +1,17 @@
 const carModel = require('../models/carModel');
 const knex = require('../models/connection');
+const { format } = require('date-fns');
 
 const registerCar = async (req, res) => {
-    const {
-        brand,
-        model,
-        registration_date        
-    } = req.body
+    const { brand, model } = req.body
 
     try {
         await carModel.validate(req.body);
-
-        // To do: configurar o registration date
+        
         const carRegistered = await knex('cars').insert({
             brand,
             model,
-            registration_date 
+            registration_date: format(new Date(), 'dd-MM-yyyy HH:mm:ss') 
         });
 
         if (!carRegistered) {
@@ -31,13 +27,9 @@ const registerCar = async (req, res) => {
 
 const updateCar = async (req, res) => {
     const { id } = req.params;
-    const {
-        brand,
-        model,       
-    } = req.body;
     
     try {
-        // validação 
+        dataForUpdateCharge = await carModel.validate(req.body);
         
         const [carFound] = await knex('cars').where({ id });
 
@@ -47,15 +39,14 @@ const updateCar = async (req, res) => {
 
         const [carUpdated] = await knex('cars')
         .where({ id: carFound.id })
-        .update(
-            brand,
-            model
-        )
+        .update(dataForUpdateCharge)
         .returning('*');
 
     if (!carUpdated) {
         return res.status(400).json('Não foi possível realizar atualização.');
     };
+
+    return res.status(200).json('Carro atualizado com sucesso.');
 
     } catch (error) {
         return res.status(500).json(error.message);
