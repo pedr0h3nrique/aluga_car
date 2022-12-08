@@ -19,6 +19,7 @@
   "homepage": "https://github.com/pedr0h3nrique/aluga_car#readme",
   "dependencies": {
     "date-fns": "^2.29.3",
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "knex": "^2.3.0",
     "pg": "^8.8.0",

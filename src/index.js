@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 
 // controllers
@@ -34,4 +35,4 @@ app.delete('/cars:id', deleteCar);
 
 
 // Executar o serviço
-app.listen(3000);
+app.listen(process.env.PORT);

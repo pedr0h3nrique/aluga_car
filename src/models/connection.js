@@ -1,13 +1,11 @@
+require('dotenv').config();
 
 const knex = require('knex') ({
     client: 'pg',
     connection: {
-        user: 'postgres',
-        host: 'localhost',
-        database: 'aluga_car_db',
-        password: 'postgres',
-        port: '5432'
-    }    
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+    }
 });
 
 module.exports = knex;
