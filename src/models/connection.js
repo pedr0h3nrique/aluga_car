@@ -1,13 +1,7 @@
+const mongoose = require('mongoose');
 
-const knex = require('knex') ({
-    client: '',
-    connection: {
-        user: '',
-        host: '',
-        database: '',
-        password: '',
-        port: ''
-    }    
-});
+async function startDB() {
+    await mongoose.connect('');
+}
 
-module.exports = knex;
+module.exports = connection;
