@@ -1,12 +1,12 @@
 
 const knex = require('knex') ({
-    client: 'pg',
+    client: '',
     connection: {
-        user: 'postgres',
-        host: 'localhost',
-        database: 'aluga_car_db',
-        password: 'postgres',
-        port: '5432'
+        user: '',
+        host: '',
+        database: '',
+        password: '',
+        port: ''
     }    
 });
 
