@@ -1,5 +1,5 @@
 const carModel = require('../models/carModel');
-const knex = require('../verify/verifyCar');
+require('../verify/verifyCar');
 
 class carController {
     async store(req, res) {

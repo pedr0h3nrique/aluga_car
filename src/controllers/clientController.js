@@ -1,5 +1,5 @@
 const clientModel = require('../models/clientModel');
-const knex = require('../verify/verifyClients');
+require('../verify/verifyClients');
 
 class clientController {
     async store(req, res) {
