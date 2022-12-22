@@ -1,132 +1,106 @@
 const clientModel = require('../models/clientModel');
-const knex = require('../models/connection');
-const { format } = require('date-fns');
+const knex = require('../verify/verifyClients');
 
-const registerClient = async (req, res) => {
-    const {
-        name,
-        cpf,
-        car,
-        date_of_birth,        
-    } = req.body
+class clientController {
+    async store(req, res) {
+        try {
+            
+            await clientModel.validate(req.body);
+            
+            
+            // const clientAlredyCreated = await clientModel.findOne({ cpf });
+            // if (clientAlredyCreated) {
+            //     return res.status(401).json({ message: 'Client alredy created.' })
+            // };
+            
+            const createdClient = await clientModel.create(req.body);
+            
+            
+            if (!createdClient) {
+                return res.status(400).json({ message: 'Unable to create client.' })
+            };
+            
+            return res.status(201).json(createdClient);
 
-    try {
-        await clientModel.validate(req.body);
-
-        const clientsList = await knex('clients').where({ cpf });
-
-        for (client of clientsList) {
-            if (client.cpf === cpf) {
-                return res.status(400).json('O cpf informado já está cadastrado.');
-            }
-        };
-
-        const [clientRegistered] = await knex('clients').insert({
-            name: name.trim(),
-            cpf,
-            car,
-            date_of_birth,
-            created_at: format(new Date(), 'dd-MM-yyyy HH:mm:ss') 
-        });
-
-        if (!clientRegistered) {
-            return res.status(400).json('Não foi possível concluir cadastro.')
-        };
-
-        return res.status(201).json('Cadastro realizado com sucesso.');
-
-    } catch (error) {
-        return res.status(500).json(error.message);
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
     };
-};
-
-const updateClient = async (req, res) => {
-    const { id } = req.params;
-    const {
-        name,
-        cpf,
-        car,
-        date_of_birth        
-    } = req.body;
     
-    try {
-        dataToUpdate = await clientModel.validate(req.body);
-        
-        const [clientFound] = await knex('clients').where({ id });
+    async index(req, res) {
+        try {
+            const clients = await clientModel.find();
+            
+            return res.status(200).json(clients);
 
-        if (cpf !== clientFound.cpf) {
-            const [cpfAlreadyRegistered] = await knex('clients').where({ cpf });
-
-            if (cpfAlreadyRegistered) {
-                return res.status(400).json('O cpf informado já está cadastrado.');
-            }
-        };
-
-        const [clientUpdated] = await knex('clients')
-        .where({ id: clientFound.id })
-        .update(dataToUpdate)
-        .returning('*');
-
-    if (!clientUpdated) {
-        return res.status(400).json('Não foi possível realizar atualização');
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
     };
-
-    return res.status(200).json('Cliente atualizado com sucesso.');
-
-    } catch (error) {
-        return res.status(500).json(error.message);
+    
+    async show(req, res) {
+        try {
+            const { id } = req.params;
+            
+            const client = await clientModel.findById(id);
+    
+            if (!client) {
+                return res.status(404).json({ message: 'Client not found.' });
+            };
+    
+            return res.status(201).json(client);  
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
     };
-       
-};
+    
+    async update(req, res) {
+        try {
+            const { id } = req.params;
 
-const listClients = async (_, res) => {
-    try {
-		const clients = await knex('clients');
+            // const clientFound = await clientModel.findById(id);
+            
+            // if (cpf !== clientFound.cpf) {
+            //     const [clientAlredyCreated] = await clientModel.findOne({ cpf });
+                
+            //     if (clientAlredyCreated) {
+            //         return res.status(401).json({ message: 'CPF alredy created.' })
+            //     } 
+            // };
+            
+            await clientModel.validate(req.body);
+            
+            const clientUpdated = await clientModel.findByIdAndUpdate(id, req.body);
 
-		return res.json(clients);
-	} catch (error) {
-		return res.status(500).json(error.message);
-	};
-};
+            if (!clientUpdated) {
+                return res.status(400).json({ message: 'Unable to update client.' })
+            };
+           
+            return res.status(200).json({ message: 'Client updated.' });
 
-const getClient = async (req, res) => {
-    const { id } = req.params;
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
 
-    try {
-        const [client] = await knex('clients').where({ id });
-        
-        if (!client) {
-            return res.status(400).json('Cliente não encontrado');
-        };
-
-        return res.status(200).json(client);
-    } catch (error) {
-        return res.status(500).json(error.message);
-    };
-};
-
-const deleteClient = async (req, res) => {
-    const { id } = req.params;
-   
-    const [client] = await knex('clients').where({ id });
-
-    if (!client) {
-        return res.status(400).json('Não foi possível encontrar cliente.');
-    };
-
-    const clientDeleted = await knex('clients').where({ id }).del();
-
-    if (!clientDeleted) {
-      return res.status(400).json('Não foi possível excluir cliente.');
     }
+    
+    async destroy(req, res) {
+        try {
+            const { id } = req.params;
+            
+            const clientDeleted = await clientModel.findByIdAndDelete(id);
+            
+            if (!clientDeleted) {
+                return res.status(404).json({ message: 'Client not found.' });
+            }
 
-    return res.json('Cliente excluído.');
-};
+            return res.status(200).json({ message: 'Client deleted.' });
+ 
+         } catch (error) {
+             return res.status(500).json({ message: error.message });
+         }
+    };
 
-module.exports = {
-    registerClient,
-    updateClient,
-    listClients,
-    getClient,
-    deleteClient
-};
+}
+
+module.exports = new clientController;
