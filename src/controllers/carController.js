@@ -1,7 +1,7 @@
 const carModel = require('../models/carModel');
 require('../verify/verifyCar');
 
-class carController {
+class CarController {
     async store(req, res) {
         try {
             await carModel.validate(req.body);
@@ -101,4 +101,4 @@ class carController {
 
 }
 
-module.exports = new carController;
+module.exports = new CarController;

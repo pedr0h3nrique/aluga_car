@@ -1,7 +1,7 @@
 const clientModel = require('../models/clientModel');
 require('../verify/verifyClients');
 
-class clientController {
+class ClientController {
     async store(req, res) {
         try {
             
@@ -103,4 +103,4 @@ class clientController {
 
 }
 
-module.exports = new clientController;
+module.exports = new ClientController;
