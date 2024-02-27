@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
-const clientSchema = new Schema({
+const userSchema = new Schema({
     id: ObjectId,
     name: String,
     cpf: Number,
@@ -13,6 +13,6 @@ const clientSchema = new Schema({
     updated_at: { type: Date, default: Date.now }
 });
 
-const clientModel =  mongoose.model('clients', clientSchema);
+const userModel =  mongoose.model('user', userSchema);
 
-module.exports = clientModel;
+module.exports = userModel;

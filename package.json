@@ -22,13 +22,14 @@
     "date-fns": "^2.29.3",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "joi": "^17.12.1",
     "knex": "^2.3.0",
-    "mongoose": "^6.8.0",
+    "mongoose": "^6.12.6",
     "pg": "^8.8.0",
     "yup": "^0.32.11",
     "yup-locales": "^1.2.10"
   },
   "devDependencies": {
-    "nodemon": "^2.0.20"
+    "nodemon": "^3.0.3"
   }
 }

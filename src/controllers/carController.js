@@ -1,27 +1,27 @@
 const carModel = require('../models/carModel');
-require('../verify/verifyCar');
+require('../middlewares/carValidation');
 
 class CarController {
     async store(req, res) {
         try {
-            await carModel.validate(req.body);
+            await carSchema.validate(req.body, { abortEarly: false });
             
-            // const carAlredyCreated = await carModel.findOne({ registration_date });
+            const existingCar = await carModel.findOne({registration_date: req.body.registration_date});
             
-            // if (carAlredyCreated) {
-            //     return res.status(401).json({ message: 'Car alredy created.' })
-            // };
+            if(existingCar) {
+                return res.status(401).json({error: 'Carro já cadastrado'});
+            }
             
             const createdCar = await carModel.create(req.body);
 
-            if (!createdCar) {
-                return res.status(400).json({ message: 'Unable to create car.' })
-            };
-            
             return res.status(201).json(createdCar);
 
         } catch (error) {
-            return res.status(500).json({ message: error.message });
+            if (error.name === 'ValidationError') {
+                return res.status(400).json({error: 'Erro de validação', details: error.errors});
+            } else {
+                return res.status(500).json({ error: 'Erro interno do servidor' });  
+            }
         }
     };
     
@@ -32,7 +32,7 @@ class CarController {
             return res.status(200).json(cars);
 
         } catch (error) {
-            return res.status(500).json({ message: error.message });
+            return res.status(500).json({ error: 'Erro interno do servidor' });
         }
     };
     
@@ -43,43 +43,42 @@ class CarController {
             const car = await carModel.findById(id);
     
             if (!car) {
-                return res.status(404).json({ message: 'Car not found.' });
+                return res.status(404).json({ error: 'Carro não encontrado' });
             };
     
             return res.status(201).json(car);  
         } catch (error) {
-            return res.status(500).json({ message: error.message });
+            return res.status(500).json({ error: 'Erro interno do servidor' });
         }
     };
     
     async update(req, res) {
         try {
-            const { id } = req.params;
+            await carSchema.validate(req.body, { abortEarly: false });
 
-            const carFound = await carModel.findById(id);
+            const { id } = req.params;       
             
-            // if (registration_date !== carFound.registration_date) {
-            //     const [carAlredyCreated] = await carModel.findOne({ car });
-                
-            //     if (carAlredyCreated) {
-            //         return res.status(401).json({ message: 'Car alredy created.' })
-            //     } 
-            // };
+            const existingCar = await carModel.findOne({registration_date: req.body.registration_date})
             
-            await carModel.validate(req.body);
+            if(existingCar){
+                return res.status(401).json({error: 'Carro já cadastrado'});
+            }
             
-            const carUpdated = await carModel.findByIdAndUpdate(id, req.body);
+            const updatedCar = await carModel.findByIdAndUpdate(id, req.body, {new: true});
+            
+            if(!updatedCar) {
+                return res.status(404).json({error: 'Carro não encontrado'});
+            } 
 
-            if (!carUpdated) {
-                return res.status(400).json({ message: 'Unable to update car.' })
-            };
-           
-            return res.status(200).json({ message: 'Car updated.' });
-
+            return res.status(200).json({updatedCar});          
+        
         } catch (error) {
-            return res.status(500).json({ message: error.message });
+            if (!carUpdated) {
+                return res.status(400).json({error: 'Erro de validação', details: error.errors})
+            } else{
+            return res.status(500).json({ error: 'Erro interno do servidor' });
+            }
         }
-
     }
     
     async destroy(req, res) {
@@ -89,13 +88,13 @@ class CarController {
             const carDeleted = await carModel.findByIdAndDelete(id);
             
             if (!carDeleted) {
-                return res.status(404).json({ message: 'Car not found.' });
+                return res.status(404).json({ message: 'Carro não encontrado' });
             }
 
-            return res.status(200).json({ message: 'Car deleted.' });
+            return res.status(200).json({ message: 'Carro excluído' });
  
          } catch (error) {
-             return res.status(500).json({ message: error.message });
+             return res.status(500).json({ error: 'Erro interno do servidor' });
          }
     };
 
