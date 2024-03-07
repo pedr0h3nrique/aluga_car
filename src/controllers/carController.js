@@ -29,7 +29,7 @@ class CarController {
         try {
             const cars = await carModel.find();
             
-            return res.status(200).json(cars);
+            return res.status(200).json({data: cars});
 
         } catch (error) {
             return res.status(500).json({ error: 'Erro interno do servidor' });
@@ -70,7 +70,7 @@ class CarController {
                 return res.status(404).json({error: 'Carro não encontrado'});
             } 
 
-            return res.status(200).json({updatedCar});          
+            return res.status(200).json({data: updatedCar});          
         
         } catch (error) {
             if (!carUpdated) {

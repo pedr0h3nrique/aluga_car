@@ -15,7 +15,7 @@ class UserController {
             
             const createdUser = await userModel.create(req.body);
             
-            return res.status(201).json(createdUser);
+            return res.status(201).json({data: createdUser});
 
         } catch (error) {
             if (error.name === 'ValidationError') {
@@ -30,7 +30,7 @@ class UserController {
         try {
             const users = await userModel.find();
             
-            return res.status(200).json(users);
+            return res.status(200).json({data: users});
 
         } catch (error) {
             return res.status(500).json({ error: 'Erro interno do servidor' });
@@ -47,7 +47,7 @@ class UserController {
                 return res.status(404).json({ message: 'Usuário não encontrado' });
             };
     
-            return res.status(201).json(user);  
+            return res.status(201).json({data: user});  
         } catch (error) {
             return res.status(500).json({ message: 'Erro interno do servidor' });
         }
